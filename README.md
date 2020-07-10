@@ -1,11 +1,7 @@
 - join two ktables on foreign key, created by debezium from postgres
-- postgres
-    - tables
-        - messages
-        - users
-    - would be more compelling if users & messages were in separate postgres instances, to simulate microservice databases
-- zk, kafka, schema registry, kafka connect?, ksqldb?
-- docker-compose runs all components
+- two separate postgres servers, simulates microservices
+  - postgres0 contains users
+  - postgres1 contains messages
 - debezium
     - stream pg tables to kafka topics
     - register avro schemas
@@ -19,25 +15,16 @@
 
 ```
 #run all components:
-docker-compose up -d
+docker-compose up --build -d
 
 #verify everything is running using:
 docker-compose ps
 
-#set up postgres
-./setup-postgres.sh
-
-#install debezium connector
-docker-compose exec connect confluent-hub install --no-prompt debezium/debezium-connector-postgresql:1.2.0
-
-#restart kafka connect to load debezium connector
-docker-compose restart connect
-
-#after kafka connect restarts, run the postgres source connector
-./run-basic-postgres-source.sh
+#after kafka connect starts (check its logs using: `docker-compose logs -f connect`), run the postgres source connectors:
+./run-connectors.sh
 
 #view contents of users topic (run in confluent download dir)
-bin/kafka-console-consumer --bootstrap-server localhost:9092 --property print.key=true --formatter io.confluent.kafka.formatter.AvroMessageFormatter --property schema.registry.url=http://localhost:8081 --topic chat.public.users --from-beginning
+bin/kafka-console-consumer --bootstrap-server localhost:9092 --property print.key=true --formatter io.confluent.kafka.formatter.AvroMessageFormatter --property schema.registry.url=http://localhost:8081 --topic postgres0.public.users --from-beginning
 ```
 
 Example user change record key:
@@ -52,7 +39,7 @@ And value:
 {
   "before": null,
   "after": {
-    "chat.public.users.Value": {
+    "postgres0.public.users.Value": {
       "user_id": "8f232ed5-4cf6-4606-b539-f608473e5949",
       "name": "Alice Adams"
     }
@@ -60,8 +47,8 @@ And value:
   "source": {
     "version": "1.2.0.Final",
     "connector": "postgresql",
-    "name": "chat",
-    "ts_ms": 1593358575676,
+    "name": "postgres0",
+    "ts_ms": 1594348029442,
     "snapshot": {
       "string": "true"
     },
@@ -69,16 +56,16 @@ And value:
     "schema": "public",
     "table": "users",
     "txId": {
-      "long": 493
+      "long": 491
     },
     "lsn": {
-      "long": 24619272
+      "long": 24577880
     },
     "xmin": null
   },
   "op": "r",
   "ts_ms": {
-    "long": 1593358575681
+    "long": 1594348029444
   },
   "transaction": null
 }
@@ -96,35 +83,35 @@ And value:
 {
   "before": null,
   "after": {
-    "chat.public.messages.Value": {
+    "postgres1.public.messages.Value": {
       "message_id": "7eda6993-2fae-4104-9565-dd509a172c7d",
       "user_id": "8f232ed5-4cf6-4606-b539-f608473e5949",
       "message": "Hello my name is Alice",
-      "sent": "2020-06-28T15:43:17.050942Z"
+      "sent": "2020-07-10T02:26:01.941334Z"
     }
   },
   "source": {
     "version": "1.2.0.Final",
     "connector": "postgresql",
-    "name": "chat",
-    "ts_ms": 1593358997051,
+    "name": "postgres1",
+    "ts_ms": 1594348048429,
     "snapshot": {
-      "string": "false"
+      "string": "last"
     },
     "db": "postgres",
     "schema": "public",
     "table": "messages",
     "txId": {
-      "long": 494
+      "long": 491
     },
     "lsn": {
-      "long": 24619600
+      "long": 24578296
     },
     "xmin": null
   },
-  "op": "c",
+  "op": "r",
   "ts_ms": {
-    "long": 1593358997156
+    "long": 1594348048430
   },
   "transaction": null
 }

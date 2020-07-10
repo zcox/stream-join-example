@@ -5,14 +5,22 @@
 version: '2'
 services:
 
-  postgres:
-    # this is basically the stock postgres:12 image, with a few debezium configs, see https://github.com/debezium/docker-images/tree/master/postgres/12
-    # TODO should really try to use stock postgres:12 image though, to verify pgoutput works properly, with no extensions required
-    image: debezium/postgres:12
-    hostname: postgres
-    container_name: postgres
+  postgres0:
+    build: postgres0
+    hostname: postgres0
+    container_name: postgres0
     ports:
       - "5432:5432"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+
+  postgres1:
+    build: postgres1
+    hostname: postgres1
+    container_name: postgres1
+    ports:
+      - "5433:5432"
     environment:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
@@ -66,14 +74,15 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper:2181'
 
   connect:
-    image: cnfldemos/cp-server-connect-datagen:0.3.2-5.5.0
+    build: connect
     hostname: connect
     container_name: connect
     depends_on:
       - zookeeper
       - broker
       - schema-registry
-      - postgres
+      - postgres0
+      - postgres1
     ports:
       - "8083:8083"
     environment:
