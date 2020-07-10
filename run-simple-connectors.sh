@@ -13,11 +13,13 @@ curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" 
     "database.user": "postgres",
     "database.password": "postgres",
     "database.dbname" : "postgres",
-    "database.server.name": "debezium.simple.postgres0",
-    "transforms": "unwrap",
+    "database.server.name": "postgres0",
+    "transforms": "unwrap,addPrefix",
     "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
     "transforms.unwrap.drop.tombstones": "false",
-    "transforms.unwrap.add.headers": "name,schema,table,op"
+    "transforms.addPrefix.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.addPrefix.regex": ".*",
+    "transforms.addPrefix.replacement": "debezium.simple.\$0"
   }
 }
 EOF
@@ -33,11 +35,13 @@ curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" 
     "database.user": "postgres",
     "database.password": "postgres",
     "database.dbname" : "postgres",
-    "database.server.name": "debezium.simple.postgres1",
-    "transforms": "unwrap",
+    "database.server.name": "postgres1",
+    "transforms": "unwrap,addPrefix",
     "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
     "transforms.unwrap.drop.tombstones": "false",
-    "transforms.unwrap.add.headers": "name,schema,table,op"
+    "transforms.addPrefix.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.addPrefix.regex": ".*",
+    "transforms.addPrefix.replacement": "debezium.simple.\$0"
   }
 }
 EOF
