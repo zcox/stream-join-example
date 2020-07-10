@@ -1,5 +1,5 @@
 FROM postgres:12
 
-COPY postgresql.conf.sample /usr/share/postgresql/postgresql.conf.sample
+ADD postgresql.conf.sample /usr/share/postgresql/
 
 ADD messages.sql /docker-entrypoint-initdb.d/
