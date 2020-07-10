@@ -21,7 +21,8 @@ docker-compose up --build -d
 docker-compose ps
 
 #after kafka connect starts (check its logs using: `docker-compose logs -f connect`), run the postgres source connectors:
-./run-connectors.sh
+./run-basic-connectors.sh
+./run-simple-connectors.sh
 
 #view contents of users topic (run in confluent download dir)
 bin/kafka-console-consumer --bootstrap-server localhost:9092 --property print.key=true --formatter io.confluent.kafka.formatter.AvroMessageFormatter --property schema.registry.url=http://localhost:8081 --topic postgres0.public.users --from-beginning
